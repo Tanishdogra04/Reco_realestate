@@ -7,7 +7,7 @@ const router = express.Router();
 // GET /api/properties — public, fetch all properties
 router.get('/', async (req, res) => {
   try {
-    const { category, type, status, search } = req.query;
+    const { category, type, status, search, featured } = req.query;
     let query = {};
 
     if (search) {
@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
     if (category) query.category = { $regex: new RegExp(`^${category}$`, 'i') };
     if (type) query.type = { $regex: new RegExp(`^${type}$`, 'i') };
     if (status) query.status = { $regex: new RegExp(`^${status}$`, 'i') };
+    if (featured === 'true') query.featured = true;
 
     const properties = await Property.find(query).sort({ createdAt: -1 });
     res.json(properties);

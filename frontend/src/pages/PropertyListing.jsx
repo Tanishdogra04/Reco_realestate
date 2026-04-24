@@ -7,17 +7,50 @@ import { Search, SlidersHorizontal, ChevronRight, Sparkles, MapPin, Building2, L
 import { fetchProperties } from '../api';
 
 const heroConfigs = {
-  residential: {
-    title: 'Elite Residences',
-    subtitle: 'Luxury apartments and palatial villas designed for the discerning few.',
-    bg: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
+  // Property category routes
+  buy: {
+    title: 'Homes for Sale',
+    subtitle: 'Discover your dream home from our curated portfolio of luxury properties across India\'s finest addresses.',
+    bg: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80',
     accent: 'text-amber-500'
+  },
+  rent: {
+    title: 'Premium Rentals',
+    subtitle: 'Experience world-class living with our handpicked selection of furnished luxury rentals.',
+    bg: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=80',
+    accent: 'text-sky-400'
   },
   commercial: {
     title: 'Corporate Landmarks',
     subtitle: 'Strategic office spaces and retail hubs in the heart of commercial excellence.',
     bg: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80',
     accent: 'text-blue-500'
+  },
+  // Project status routes
+  new: {
+    title: 'New Launches',
+    subtitle: 'Be the first to invest in India\'s most anticipated new real estate launches.',
+    bg: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=80',
+    accent: 'text-emerald-400'
+  },
+  ready: {
+    title: 'Ready to Move',
+    subtitle: 'Move in today — zero wait time. Premium properties ready for immediate possession.',
+    bg: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=80',
+    accent: 'text-green-400'
+  },
+  'under-construction': {
+    title: 'Under Construction',
+    subtitle: 'Invest early and lock in the best prices on properties under active development.',
+    bg: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80',
+    accent: 'text-orange-400'
+  },
+  // Browse category routes
+  residential: {
+    title: 'Elite Residences',
+    subtitle: 'Luxury apartments and palatial villas designed for the discerning few.',
+    bg: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
+    accent: 'text-amber-500'
   },
   land: {
     title: 'Prime Estates',
@@ -72,44 +105,69 @@ export default function PropertyListing() {
   const [filterPrice, setFilterPrice] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // Build Hero Data
-  const currentMainCat = mainCategory || category || 'default';
-  const hero = heroConfigs[currentMainCat.toLowerCase()] || heroConfigs.default;
+  // Build Hero Data — check all possible route params for a key
+  const heroKey = (status || category || mainCategory || 'default').toLowerCase();
+  const hero = heroConfigs[heroKey] || heroConfigs.default;
   
   // Build Page Title
+  const statusTitles = {
+    new: 'New Launches',
+    ready: 'Ready to Move',
+    'under-construction': 'Under Construction',
+  };
+  const categoryTitles = {
+    buy: 'Homes for Sale',
+    rent: 'Premium Rentals',
+    commercial: 'Commercial Properties',
+  };
   let displayTitle = hero.title;
-  if (subCategory || type) {
-    const sub = subCategory || type;
+  if (status) displayTitle = statusTitles[status] || hero.title;
+  else if (category) displayTitle = categoryTitles[category?.toLowerCase()] || hero.title;
+  else if (subCategory) {
+    const sub = subCategory;
     displayTitle = `${sub.charAt(0).toUpperCase() + sub.slice(1)}s Collection`;
   } else if (searchQuery) {
-    displayTitle = `Search: ${searchQuery}`;
+    displayTitle = `Search: "${searchQuery}"`;
   }
 
   useEffect(() => {
     setLoading(true);
     const params = {};
+
     if (searchQuery) params.search = searchQuery;
-    if (category)    params.category = category;
-    if (type)        params.type = type;
+
+    // Map URL category slug → DB enum value
+    const categoryMap = { buy: 'Buy', rent: 'Rent', commercial: 'Commercial' };
+    if (category) params.category = categoryMap[category.toLowerCase()] || category;
+
+    if (type) params.type = type;
+
+    // Browse by mainCategory route (/browse/:mainCategory)
     if (mainCategory) {
-       // Map mainCategory to DB category if needed
-       if (mainCategory === 'residential') params.category = 'Buy'; // Default for residential
-       else if (mainCategory === 'commercial') params.category = 'Commercial';
+      if (mainCategory === 'residential') params.category = 'Buy';
+      else if (mainCategory === 'commercial') params.category = 'Commercial';
     }
+
+    // Sub-category maps to property type
     if (subCategory) {
-       // subCategory maps to property type
-       const map = {
-          'apartment': 'Apartment',
-          'villa': 'Villa',
-          'penthouse': 'Penthouse',
-          'office': 'Commercial',
-          'retail': 'Commercial',
-          'plot': 'Plot'
-       };
-       params.type = map[subCategory.toLowerCase()] || subCategory;
+      const typeMap = {
+        apartment: 'Apartment',
+        villa: 'Villa',
+        penthouse: 'Penthouse',
+        office: 'Commercial',
+        retail: 'Commercial',
+        plot: 'Plot',
+      };
+      params.type = typeMap[subCategory.toLowerCase()] || subCategory;
     }
+
+    // Project status route (/projects/:status)
     if (status) {
-      const statusMap = { ready: 'Ready to Move', new: 'New Launch', 'under-construction': 'Under Construction' };
+      const statusMap = {
+        ready: 'Ready to Move',
+        new: 'New Launch',
+        'under-construction': 'Under Construction',
+      };
       params.status = statusMap[status] || status;
     }
 

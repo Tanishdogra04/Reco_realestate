@@ -165,8 +165,8 @@ export default function FeaturedProperties() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProperties()
-      .then(data => setProperties(data.slice(0, 3)))
+    fetchProperties({ featured: 'true' })
+      .then(data => setProperties(data.slice(0, 6)))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -188,7 +188,7 @@ export default function FeaturedProperties() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading
-            ? [1, 2, 3].map(i => <PropertySkeleton key={i} />)
+            ? [1, 2, 3, 4, 5, 6].map(i => <PropertySkeleton key={i} />)
             : properties.map(p => <PropertyCard key={p._id || p.id} property={p} />)
           }
         </div>
