@@ -9,44 +9,68 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-// CORS — open to all origins (public API, no CLIENT_URL needed)
-app.use(cors({ origin: true, credentials: true }));
+/* =======================
+   CORS CONFIG (SAFE)
+======================= */
+app.use(cors({
+  origin: true, // allow all (good for now)
+  credentials: true
+}));
 
+/* =======================
+   MIDDLEWARE
+======================= */
 app.use(express.json());
 
-// Routes
+/* =======================
+   ROUTES
+======================= */
 app.use('/api/properties', propertyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 
-// Health check
+/* =======================
+   HEALTH CHECK
+======================= */
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'reco. API is running 🏠' });
+  res.json({ status: 'ok', message: 'API is running 🏠' });
 });
 
-// 404 handler
+/* =======================
+   404 HANDLER
+======================= */
 app.use((req, res) => {
   res.status(404).json({ message: `Route ${req.originalUrl} not found.` });
 });
 
-// Global error handler
+/* =======================
+   ERROR HANDLER
+======================= */
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: 'Internal server error.' });
+  res.status(500).json({ message: 'Internal server error' });
 });
 
-// Connect to MongoDB and start server
+/* =======================
+   START SERVER FIRST (IMPORTANT FOR RENDER)
+======================= */
 const PORT = process.env.PORT || 5000;
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+/* =======================
+   CONNECT TO MONGODB
+======================= */
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI is missing in environment variables");
+} else {
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+      console.log('✅ Connected to MongoDB');
+    })
+    .catch((err) => {
+      console.error('❌ MongoDB connection failed:', err.message);
     });
-  })
-  .catch((err) => {
-    console.error(' MongoDB connection failed:', err.message);
-    process.exit(1);
-  });
+}
