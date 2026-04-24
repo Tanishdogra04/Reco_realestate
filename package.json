@@ -1,0 +1,21 @@
+{
+  "name": "eliteestates",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EliteEstates – Full-stack MERN real estate portal (monorepo)",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev || node server.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "axios": "^1.14.0",
+    "dotenv": "^17.4.1",
+    "mongoose": "^9.4.1"
+  }
+}
