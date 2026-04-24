@@ -13,7 +13,7 @@ const app = express();
    CORS CONFIG (SAFE)
 ======================= */
 app.use(cors({
-  origin: true, // allow all (good for now)
+  origin: (origin, callback) => callback(null, true), // Always allow any origin
   credentials: true
 }));
 
