@@ -9,18 +9,9 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-// Middleware
-const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'].filter(Boolean);
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+// CORS — open to all origins (public API, no CLIENT_URL needed)
+app.use(cors({ origin: true, credentials: true }));
+
 app.use(express.json());
 
 // Routes
